@@ -4,14 +4,6 @@
 	{
 		"en"	"Gloves Menu"
 	}
-	"CT"
-	{
-		"en"	"Counter-Terrorist"
-	}
-	"T"
-	{
-		"en"	"Terrorist"
-	}
 	"Increase"
 	{
 		"en"	"Increase by %d%%"
@@ -19,10 +11,6 @@
 	"Decrease"
 	{
 		"en"	"Decrease by %d%%"
-	}
-	"ChooseLanguage"
-	{
-		"en"	"Select language for glove names:"
 	}
 	"DefaultGloves"
 	{
@@ -35,5 +23,29 @@
 	"SetFloat"
 	{
 		"en"	"Gloves Condition: "
+	}
+	"Invoke"
+	{
+		"en"	"Apply Other Team"
+	}
+	"RandomOff"
+	{
+		"en"	"Random: Off"
+	}
+	"RandomSkin"
+	{
+		"en"	"Random: Only Skin"
+	}
+	"RandomBoth"
+	{
+		"en"	"Random: Skin & Glove"
+	}
+	"ChooseSkin"
+	{
+		"en"	"Choose Skin"
+	}
+	"ChooseGlove"
+	{
+		"en"	"Choose Glove"
 	}
 }

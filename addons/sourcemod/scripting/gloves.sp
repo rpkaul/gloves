@@ -52,16 +52,9 @@ public void OnPluginStart()
 	
 	AutoExecConfig(true, "gloves");
 	
-	RegConsoleCmd("sm_gloves", CommandGlove);
 	RegConsoleCmd("sm_glove", CommandGlove);
-	RegConsoleCmd("sm_eldiven", CommandGlove);
-	RegConsoleCmd("sm_gllang", CommandGloveLang);
 	
 	HookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_Pre);
-	
-	AddCommandListener(ChatListener, "say");
-	AddCommandListener(ChatListener, "say2");
-	AddCommandListener(ChatListener, "say_team");
 }
 
 public void OnConfigsExecuted()
@@ -99,15 +92,6 @@ public Action CommandGlove(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action CommandGloveLang(int client, int args)
-{
-	if (IsValidClient(client))
-	{
-		CreateLanguageMenu(client).Display(client, MENU_TIME_FOREVER);
-	}
-	return Plugin_Handled;
-}
-
 public void OnClientPostAdminCheck(int client)
 {
 	if(IsValidClient(client))
@@ -123,17 +107,9 @@ public void OnClientPostAdminCheck(int client)
 		}
 		g_iSteam32[client] = StringToInt(temp);
 		GetPlayerData(client);
-		QueryClientConVar(client, "cl_language", ConVarCallBack);
 	}
 }
 
-public void ConVarCallBack(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
-{
-	if(!g_smLanguageIndex.GetValue(cvarValue, g_iClientLanguage[client]))
-	{
-		g_iClientLanguage[client] = 0;
-	}
-}
 
 public void GivePlayerGloves(int client)
 {
@@ -155,9 +131,16 @@ public void GivePlayerGloves(int client)
 			{
 				char buffer[20];
 				char buffers[2][10];
-				GetRandomSkin(client, playerTeam, buffer, sizeof(buffer), g_iGroup[client][playerTeam]);
+				GetRandomSkin(client, buffer, sizeof(buffer), g_iGroup[client][playerTeam]);
 				ExplodeString(buffer, ";", buffers, 2, 10);
-				SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", StringToInt(buffers[0]));
+				if (g_iGroup[client][playerTeam] == -1)
+				{
+					SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", StringToInt(buffers[0]));
+				}
+				else
+				{
+					SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", g_iGroup[client][playerTeam]);
+				}
 				SetEntProp(ent, Prop_Send,  "m_nFallbackPaintKit", StringToInt(buffers[1]));
 			}
 			else

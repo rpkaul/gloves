@@ -4,14 +4,6 @@
 	{
 		"chi"	"手套皮肤菜单"
 	}
-	"CT"
-	{
-		"chi"	"反恐精英"
-	}
-	"T"
-	{
-		"chi"	"恐怖分子"
-	}
 	"Increase"
 	{
 		"chi"	"增加 %d%%"
@@ -19,10 +11,6 @@
 	"Decrease"
 	{
 		"chi"	"减少 %d%%"
-	}
-	"ChooseLanguage"
-	{
-		"chi"	"请选择皮肤名称显示语言："
 	}
 	"DefaultGloves"
 	{
@@ -34,6 +22,30 @@
 	}
 	"SetFloat"
 	{
-		"chi"	"手套磨损："
+		"chi"	"手套磨损: "
+	}
+	"Invoke"
+	{
+		"chi"	"应用到对面队伍"
+	}
+	"RandomOff"
+	{
+		"chi"	"随机: 未开启"
+	}
+	"RandomSkin"
+	{
+		"chi"	"随机: 皮肤"
+	}
+	"RandomBoth"
+	{
+		"chi"	"随机: 手套和皮肤"
+	}
+	"ChooseSkin"
+	{
+		"chi"	"选择皮肤"
+	}
+	"ChooseGlove"
+	{
+		"chi"	"选择手套"
 	}
 }
