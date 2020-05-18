@@ -32,8 +32,8 @@
 
 public Plugin myinfo = 
 {
-	name = "Gloves",
-	author = "kgns | oyunhost.net",
+	name = "Gloves (Modify by Bone)",
+	author = "kgns | oyunhost.net | Bone",
 	description = "CS:GO Gloves Management",
 	version = "1.0.4",
 	url = "https://www.oyunhost.net"
@@ -55,6 +55,10 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_glove", CommandGlove);
 	
 	HookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_Pre);
+	
+	AddCommandListener(ChatListener, "say");
+	AddCommandListener(ChatListener, "say2");
+	AddCommandListener(ChatListener, "say_team");
 }
 
 public void OnConfigsExecuted()
@@ -142,11 +146,21 @@ public void GivePlayerGloves(int client)
 					SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", g_iGroup[client][playerTeam]);
 				}
 				SetEntProp(ent, Prop_Send,  "m_nFallbackPaintKit", StringToInt(buffers[1]));
+				
 			}
 			else
 			{
 				SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", g_iGroup[client][playerTeam]);
 				SetEntProp(ent, Prop_Send,  "m_nFallbackPaintKit", g_iGloves[client][playerTeam]);
+			}
+			if (g_iSeed[client][playerTeam] != -1)
+			{
+				SetEntProp(ent, Prop_Send, "m_nFallbackSeed", g_iSeed[client][playerTeam]);
+			}
+			else
+			{
+				g_iSeedRandom[client][playerTeam] = GetRandomInt(0, 8192);
+				SetEntProp(ent, Prop_Send, "m_nFallbackSeed", g_iSeedRandom[client][playerTeam]);
 			}
 			SetEntPropFloat(ent, Prop_Send, "m_flFallbackWear", g_fFloatValue[client][playerTeam]);
 			SetEntPropEnt(ent, Prop_Data, "m_hOwnerEntity", client);

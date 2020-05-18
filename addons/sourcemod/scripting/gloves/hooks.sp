@@ -23,3 +23,56 @@ public void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast
 		GivePlayerGloves(clientIndex);
 	}
 }
+
+public Action ChatListener(int client, const char[] command, int args)
+{
+	int playerTeam = GetClientTeam(client);
+	char msg[128];
+	GetCmdArgString(msg, sizeof(msg));
+	StripQuotes(msg);
+	if (g_bWaitingForSeed[client] && IsValidClient(client) && g_iGloves[client][playerTeam] != 0 && !IsChatTrigger())
+	{
+		g_bWaitingForSeed[client] = false;
+		
+		int seedInt;
+		if (StrEqual(msg, "!cancel") || StrEqual(msg, "!iptal") || StrEqual(msg, ""))
+		{
+			PrintToChat(client, " %s \x02%t", g_ChatPrefix, "SeedCancelled");
+			return Plugin_Handled;
+		}
+		else if ((seedInt = StringToInt(msg)) < 0 || seedInt > 8192)
+		{
+			PrintToChat(client, " %s \x02%t", g_ChatPrefix, "SeedFailed");
+			return Plugin_Handled;
+		}
+		
+		g_iSeed[client][playerTeam] = seedInt;
+		g_iSeedRandom[client][playerTeam] = -1;
+		
+		if(playerTeam == GetClientTeam(client))
+		{
+			int activeWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			if(activeWeapon != -1)
+			{
+				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", -1);
+			}
+			GivePlayerGloves(client);
+			if(activeWeapon != -1)
+			{
+				DataPack dpack;
+				CreateDataTimer(0.1, ResetGlovesTimer, dpack);
+				dpack.WriteCell(client);
+				dpack.WriteCell(activeWeapon);
+			}
+		}
+		
+		
+		CreateTimer(0.5, SeedMenuTimer, GetClientUserId(client));
+		
+		PrintToChat(client, " %s \x04%t: \x01%i", g_ChatPrefix, "SeedSuccess", seedInt);
+		
+		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
+}

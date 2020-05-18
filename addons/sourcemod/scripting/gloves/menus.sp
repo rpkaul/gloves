@@ -401,6 +401,10 @@ public int MainMenuHandler(Menu menu, MenuAction action, int client, int selecti
 					
 					menuGloves[counter].Display(client, MENU_TIME_FOREVER);
 				}
+				else if (StrEqual(info, "seed"))
+				{
+					CreateSeedMenu(client).Display(client, MENU_TIME_FOREVER);
+				}
 				else if (StrEqual(info, "invoke"))
 				{
 						
@@ -409,6 +413,8 @@ public int MainMenuHandler(Menu menu, MenuAction action, int client, int selecti
 
 					g_iGroup[client][otherTeam] = g_iGroup[client][team];
 					g_iGloves[client][otherTeam] = g_iGloves[client][team];
+					g_fFloatValue[client][otherTeam] = g_fFloatValue[client][team];
+					g_iSeed[client][otherTeam] = g_iSeed[client][team];
 					
 
 					char updateFields[128];
@@ -421,7 +427,7 @@ public int MainMenuHandler(Menu menu, MenuAction action, int client, int selecti
 					{
 						teamName = "t";
 					}
-					Format(updateFields, sizeof(updateFields), "%s_group = %d, %s_glove = %d", teamName, g_iGroup[client][otherTeam], teamName, g_iGloves[client][otherTeam]);
+					Format(updateFields, sizeof(updateFields), "%s_group = %d, %s_glove = %d, %s_float = %.2f, %s_seed = %d", teamName, g_iGroup[client][otherTeam], teamName, g_iGloves[client][otherTeam], teamName, g_fFloatValue[client][otherTeam], teamName, g_iSeed[client][otherTeam]);
 					UpdatePlayerData(client, updateFields);
 					
 					CreateTimer(0.5, MainMenuTimer, GetClientUserId(client));
@@ -477,6 +483,8 @@ Menu CreateMainMenu(int client)
 		Format(buffer, sizeof(buffer), "%T%d%%", "SetFloat", client, wear);
 		menu.AddItem("float", buffer, (CS_TEAM_T <= team <= CS_TEAM_CT && g_iGroup[client][team] != 0 && IsPlayerAlive(client)) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	}
+	Format(buffer, sizeof(buffer), "%T", "Seed", client);
+	menu.AddItem("seed", buffer, g_iGroup[client][team] != 0 ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	
 	Format(buffer, sizeof(buffer), "%T", "Invoke", client);
 	menu.AddItem("invoke", buffer);
@@ -495,5 +503,165 @@ public Action MainMenuTimer(Handle timer, int userid)
 	if(IsValidClient(clientIndex))
 	{
 		CreateMainMenu(clientIndex).Display(clientIndex, MENU_TIME_FOREVER);
+	}
+}
+
+Menu CreateSeedMenu(int client)
+{
+	int team = GetClientTeam(client);
+	Menu menu = new Menu(SeedMenuHandler);
+
+	char buffer[128];
+
+	if (g_iSeed[client][team] != -1)
+	{
+		Format(buffer, sizeof(buffer), "%T", "SeedTitle", client, g_iSeed[client][team]);
+	}
+	else if (g_iSeedRandom[client][team] > 0)
+	{
+		Format(buffer, sizeof(buffer), "%T", "SeedTitle", client, g_iSeedRandom[client][team]);
+	}
+	else
+	{
+		Format(buffer, sizeof(buffer), "%T", "SeedTitleNoSeed", client);
+	}
+	
+	menu.SetTitle(buffer);
+
+	Format(buffer, sizeof(buffer), "%T", "SeedRandom", client);
+	menu.AddItem("rseed", buffer);
+
+	Format(buffer, sizeof(buffer), "%T", "SeedManual", client);
+	menu.AddItem("cseed", buffer);
+
+	Format(buffer, sizeof(buffer), "%T", "SeedSave", client);
+	menu.AddItem("sseed", buffer, g_iSeedRandom[client][team] == 0 ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+
+	Format(buffer, sizeof(buffer), "%T", "ResetSeed", client);
+	menu.AddItem("seedr", buffer, g_iSeed[client][team] == -1 ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+
+	menu.ExitBackButton = true;
+	
+	return menu;
+}
+
+public int SeedMenuHandler(Menu menu, MenuAction action, int client, int selection)
+{
+	switch(action)
+	{
+		case MenuAction_Select:
+		{
+			if(IsClientInGame(client))
+			{
+				int team = GetClientTeam(client);
+				
+				char teamName[4];
+				if(team == CS_TEAM_CT)
+				{
+					teamName = "ct";
+				}
+				else
+				{
+					teamName = "t";
+				}
+
+				char buffer[30];
+				menu.GetItem(selection, buffer, sizeof(buffer));
+				if(StrEqual(buffer, "rseed"))
+				{
+					g_iSeed[client][team] = -1;
+
+					if(team == GetClientTeam(client))
+					{
+						int activeWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+						if(activeWeapon != -1)
+						{
+							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", -1);
+						}
+						GivePlayerGloves(client);
+						if(activeWeapon != -1)
+						{
+							DataPack dpack;
+							CreateDataTimer(0.1, ResetGlovesTimer, dpack);
+							dpack.WriteCell(client);
+							dpack.WriteCell(activeWeapon);
+						}
+					}
+
+					CreateTimer(0.5, SeedMenuTimer, GetClientUserId(client));
+				}
+				else if (StrEqual(buffer, "cseed"))
+				{
+					g_bWaitingForSeed[client] = true;
+					PrintToChat(client, " %s \x04%t", g_ChatPrefix, "SeedInstruction");
+				}
+				else if (StrEqual(buffer, "sseed"))
+				{
+					if(g_iSeedRandom[client][team] > 0) 
+					{
+						g_iSeed[client][team] = g_iSeedRandom[client][team];
+					}
+					g_iSeedRandom[client][team] = 0;
+
+					if(team == GetClientTeam(client))
+					{
+						int activeWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+						if(activeWeapon != -1)
+						{
+							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", -1);
+						}
+						GivePlayerGloves(client);
+						if(activeWeapon != -1)
+						{
+							DataPack dpack;
+							CreateDataTimer(0.1, ResetGlovesTimer, dpack);
+							dpack.WriteCell(client);
+							dpack.WriteCell(activeWeapon);
+						}
+					}
+
+
+					char updateFields[256];
+					Format(updateFields, sizeof(updateFields), "%s_seed = %d", teamName, g_iSeed[client][team]);
+					UpdatePlayerData(client, updateFields);
+					CreateTimer(0.5, SeedMenuTimer, GetClientUserId(client));
+
+					PrintToChat(client, " %s \x04%t", g_ChatPrefix, "SeedSaved");
+				}
+				else if (StrEqual(buffer, "seedr"))
+				{
+					g_iSeed[client][team] = -1;
+					g_iSeedRandom[client][team] = 0;
+					
+					char updateFields[256];
+
+					Format(updateFields, sizeof(updateFields), "%s_seed = -1", teamName);
+					UpdatePlayerData(client, updateFields);
+					CreateTimer(0.5, SeedMenuTimer, GetClientUserId(client));
+					
+					PrintToChat(client, " %s \x04%t", g_ChatPrefix, "SeedReset");
+				}
+			}
+		}
+		case MenuAction_Cancel:
+		{
+			if(IsClientInGame(client) && selection == MenuCancel_ExitBack)
+			{
+				CreateMainMenu(client).Display(client, MENU_TIME_FOREVER);
+			}
+		}
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+	}
+}
+
+public Action SeedMenuTimer(Handle timer, int userid)
+{
+	int clientIndex = GetClientOfUserId(userid);
+	if(IsValidClient(clientIndex))
+	{
+		CreateSeedMenu(clientIndex).Display(clientIndex, MENU_TIME_FOREVER);
 	}
 }

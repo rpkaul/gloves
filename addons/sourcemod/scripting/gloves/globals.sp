@@ -41,9 +41,13 @@ int g_iEnableWorldModel;
 int g_iGroup[MAXPLAYERS+1][4];
 int g_iGloves[MAXPLAYERS+1][4];
 float g_fFloatValue[MAXPLAYERS+1][4];
+int g_iSeed[MAXPLAYERS+1][4];
+int g_iSeedRandom[MAXPLAYERS+1][4];
 char g_CustomArms[MAXPLAYERS+1][4][256];
 Handle g_FloatTimer[MAXPLAYERS+1] = { INVALID_HANDLE, ... };
 int g_iSteam32[MAXPLAYERS+1] = { 0, ... };
+
+bool g_bWaitingForSeed[MAXPLAYERS+1] = { false, ... };
 
 Menu menuGlovesGroup;
 Menu menuGloves[8];

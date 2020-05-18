@@ -42,9 +42,11 @@ public void T_GetPlayerDataCallback(Database database, DBResultSet results, cons
 			g_iGroup[client][CS_TEAM_T] = 0;
 			g_iGloves[client][CS_TEAM_T] = 0;
 			g_fFloatValue[client][CS_TEAM_T] = 0.0;
+			g_iSeed[client][CS_TEAM_T] = -1;
 			g_iGroup[client][CS_TEAM_CT] = 0;
 			g_iGloves[client][CS_TEAM_CT] = 0;
 			g_fFloatValue[client][CS_TEAM_CT] = 0.0;
+			g_iSeed[client][CS_TEAM_CT] = -1;
 		}
 		else
 		{
@@ -55,6 +57,7 @@ public void T_GetPlayerDataCallback(Database database, DBResultSet results, cons
 					g_iGroup[client][j] = results.FetchInt(i);
 					g_iGloves[client][j] = results.FetchInt(i + 1);
 					g_fFloatValue[client][j] = results.FetchFloat(i + 2);
+					g_iSeed[client][j] = results.FetchInt(i + 6);
 				}
 			}
 		}
@@ -118,6 +121,7 @@ public void T_CreateTableCallback(Database database, DBResultSet results, const 
 	}
 	else
 	{
+		AddSeedColumns();
 		for(int i = 1; i <= MaxClients; i++)
 		{
 			if(IsClientConnected(i))
@@ -126,4 +130,15 @@ public void T_CreateTableCallback(Database database, DBResultSet results, const 
 			}
 		}
 	}
+}
+
+void AddSeedColumns()
+{
+	Transaction txn = new Transaction();
+	char query[512];
+	Format(query, sizeof(query), "ALTER TABLE %sgloves ADD t_seed int(10) NOT NULL DEFAULT '-1'", g_TablePrefix);
+	txn.AddQuery(query);
+	Format(query, sizeof(query), "ALTER TABLE %sgloves ADD ct_seed int(10) NOT NULL DEFAULT '-1'", g_TablePrefix);
+	txn.AddQuery(query);
+	db.Execute(txn);
 }
