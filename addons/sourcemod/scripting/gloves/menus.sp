@@ -29,8 +29,10 @@ public int GloveMenuHandler(Menu menu, MenuAction action, int client, int select
 				menu.GetItem(selection, gloveIdStr, sizeof(gloveIdStr));
 				char buffers[2][10];
 				ExplodeString(gloveIdStr, ";", buffers, 2, 10);
+				int groupId = StringToInt(buffers[0]);
 				int gloveId = StringToInt(buffers[1]);
 
+				g_iGroup[client][team] = groupId;
 				g_iGloves[client][team] = gloveId;
 				char updateFields[128];
 				char teamName[4];
@@ -42,7 +44,7 @@ public int GloveMenuHandler(Menu menu, MenuAction action, int client, int select
 				{
 					teamName = "t";
 				}
-				Format(updateFields, sizeof(updateFields), "%s_glove = %d", teamName, gloveId);
+				Format(updateFields, sizeof(updateFields), "%s_group = %d, %s_glove = %d", teamName, groupId, teamName, gloveId);
 				UpdatePlayerData(client, updateFields);
 				
 				if(team == GetClientTeam(client))
@@ -88,7 +90,7 @@ public int GloveMenuHandler(Menu menu, MenuAction action, int client, int select
 		{
 			if(IsClientInGame(client) && selection == MenuCancel_ExitBack)
 			{
-				CreateMainMenu(client).Display(client, MENU_TIME_FOREVER);
+				menuGlovesGroup[g_iClientLanguage[client]].DisplayAt(client, g_iLastGlovesGroupPosition[client], MENU_TIME_FOREVER);
 			}
 		}
 	}
@@ -115,34 +117,26 @@ public int GloveMainMenuHandler(Menu menu, MenuAction action, int client, int se
 		{
 			if(IsClientInGame(client))
 			{
-				char gloveIdStr[20];
-				menu.GetItem(selection, gloveIdStr, sizeof(gloveIdStr));
-				char buffer[2][10];
-				ExplodeString(gloveIdStr, ";", buffer, 2, 10);
-				int groupId = StringToInt(buffer[0]);
-				int gloveId = StringToInt(buffer[1]);
-				
+				char info[20];
+				menu.GetItem(selection, info, sizeof(info));
+				int index = StringToInt(info);
 				int team = GetClientTeam(client);
-				
-
-				g_iGroup[client][team] = groupId;
-				g_iGloves[client][team] = gloveId;
-				
-				char teamName[4];
-
-				if(team == CS_TEAM_CT)
+				if(index == 0 || index == -1)
 				{
-					teamName = "ct";
-				}
-				else
-				{
-					teamName = "t";
-				}
+					char teamName[4];
 
-				if(groupId == 0)
-				{
+					g_iGroup[client][team] = index;
+					g_iGloves[client][team] = index;
+					if(team == CS_TEAM_CT)
+					{
+						teamName = "ct";
+					}
+					else
+					{
+						teamName = "t";
+					}
 					char updateFields[128];
-					Format(updateFields, sizeof(updateFields), "%s_group = %d, %s_glove = %d", teamName, groupId, teamName, groupId);
+					Format(updateFields, sizeof(updateFields), "%s_group = %d, %s_glove = %d", teamName, index, teamName, index);
 					UpdatePlayerData(client, updateFields);
 					
 					if(team == GetClientTeam(client))
@@ -152,18 +146,19 @@ public int GloveMainMenuHandler(Menu menu, MenuAction action, int client, int se
 						{
 							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", -1);
 						}
-						
-						int ent = GetEntPropEnt(client, Prop_Send, "m_hMyWearables");
-						if(ent != -1)
+						if(index == 0)
 						{
-							AcceptEntityInput(ent, "KillHierarchy");
+							int ent = GetEntPropEnt(client, Prop_Send, "m_hMyWearables");
+							if(ent != -1)
+							{
+								AcceptEntityInput(ent, "KillHierarchy");
+							}
+							SetEntPropString(client, Prop_Send, "m_szArmsModel", g_CustomArms[client][team]);
 						}
-						SetEntPropString(client, Prop_Send, "m_szArmsModel", g_CustomArms[client][team]);
-				
-						// else
-						// {
-						// 	GivePlayerGloves(client);
-						// }
+						else
+						{
+							GivePlayerGloves(client);
+						}
 						if(activeWeapon != -1)
 						{
 							DataPack dpack;
@@ -181,32 +176,8 @@ public int GloveMainMenuHandler(Menu menu, MenuAction action, int client, int se
 				}
 				else
 				{
-					char updateFields[128];
-					Format(updateFields, sizeof(updateFields), "%s_group = %d, %s_glove = %d", teamName, groupId, teamName, gloveId);
-					UpdatePlayerData(client, updateFields);
-					
-					if(team == GetClientTeam(client))
-					{
-						int activeWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-						if(activeWeapon != -1)
-						{
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", -1);
-						}
-						GivePlayerGloves(client);
-						if(activeWeapon != -1)
-						{
-							DataPack dpack;
-							CreateDataTimer(0.1, ResetGlovesTimer, dpack);
-							dpack.WriteCell(client);
-							dpack.WriteCell(activeWeapon);
-						}
-					}
-					
-					DataPack pack;
-					CreateDataTimer(0.5, GlovesMenuTimer, pack);
-					pack.WriteCell(menu);
-					pack.WriteCell(client);
-					pack.WriteCell(GetMenuSelectionPosition());
+					g_iLastGlovesGroupPosition[client] = GetMenuSelectionPosition();
+					menuGloves[g_iClientLanguage[client]][index].Display(client, MENU_TIME_FOREVER);
 				}
 			}
 		}
@@ -218,12 +189,12 @@ public int GloveMainMenuHandler(Menu menu, MenuAction action, int client, int se
 				char display[64];
 				menu.GetItem(selection, info, sizeof(info));
 				
-				if (StrEqual(info, "0;0"))
+				if (StrEqual(info, "0"))
 				{
 					Format(display, sizeof(display), "%T", "DefaultGloves", client);
 					return RedrawMenuItem(display);
 				}
-				else if (StrEqual(info, "-1;-1"))
+				else if (StrEqual(info, "-1"))
 				{
 					Format(display, sizeof(display), "%T", "RandomGloves", client);
 					return RedrawMenuItem(display);
@@ -388,18 +359,7 @@ public int MainMenuHandler(Menu menu, MenuAction action, int client, int selecti
 				}
 				else if (StrEqual(info, "glove"))
 				{
-					menuGlovesGroup.Display(client, MENU_TIME_FOREVER);
-				}
-				else if (StrEqual(info, "skin"))
-				{
-					int counter = 1;
-					int team = GetClientTeam(client);
-					char groupIdStr[10];
-
-					IntToString(g_iGroup[client][team], groupIdStr, sizeof(groupIdStr));
-					g_smGlovesGroupIndex.GetValue(groupIdStr, counter);
-					
-					menuGloves[counter].Display(client, MENU_TIME_FOREVER);
+					menuGlovesGroup[g_iClientLanguage[client]].Display(client, MENU_TIME_FOREVER);
 				}
 				else if (StrEqual(info, "seed"))
 				{
@@ -432,6 +392,10 @@ public int MainMenuHandler(Menu menu, MenuAction action, int client, int selecti
 					
 					CreateTimer(0.5, MainMenuTimer, GetClientUserId(client));
 				}
+				else if (StrEqual(info, "lang"))
+				{
+					CreateLanguageMenu(client).Display(client, MENU_TIME_FOREVER);
+				}
 			}
 		}
 		case MenuAction_Cancel:
@@ -458,8 +422,6 @@ Menu CreateMainMenu(int client)
 
 	Format(buffer, sizeof(buffer), "%T", "ChooseGlove", client);
 	menu.AddItem("glove", buffer);
-	Format(buffer, sizeof(buffer), "%T", "ChooseSkin", client);
-	menu.AddItem("skin", buffer, (g_iGroup[client][team] == -1 || g_iGroup[client][team] == 0) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 
 	if (g_iGroup[client][team] == -1 && g_iGloves[client][team] == -1)
 	{
@@ -488,6 +450,8 @@ Menu CreateMainMenu(int client)
 	
 	Format(buffer, sizeof(buffer), "%T", "Invoke", client);
 	menu.AddItem("invoke", buffer);
+	Format(buffer, sizeof(buffer), "%T", "Language", client);
+	menu.AddItem("lang", buffer);
 
 	if(LibraryExists("diy"))
 	{
@@ -663,5 +627,56 @@ public Action SeedMenuTimer(Handle timer, int userid)
 	if(IsValidClient(clientIndex))
 	{
 		CreateSeedMenu(clientIndex).Display(clientIndex, MENU_TIME_FOREVER);
+	}
+}
+
+Menu CreateLanguageMenu(int client)
+{
+	Menu menu = new Menu(LanguageMenuHandler);
+	menu.SetTitle("%T", "ChooseLanguage", client);
+	
+	char buffer[4];
+	
+	for (int i = 0; i < sizeof(g_Language); i++)
+	{
+		if(strlen(g_Language[i]) == 0)
+			break;
+		IntToString(i, buffer, sizeof(buffer));
+		menu.AddItem(buffer, g_Language[i]);
+	}
+	
+	menu.ExitBackButton = true;
+	
+	return menu;
+}
+
+public int LanguageMenuHandler(Menu menu, MenuAction action, int client, int selection)
+{
+	switch(action)
+	{
+		case MenuAction_Select:
+		{
+			if(IsClientInGame(client))
+			{
+				char langIndexStr[4];
+				menu.GetItem(selection, langIndexStr, sizeof(langIndexStr));
+				int langIndex = StringToInt(langIndexStr);
+				
+				g_iClientLanguage[client] = langIndex;
+				
+				CreateMainMenu(client).Display(client, MENU_TIME_FOREVER);
+			}
+		}
+		case MenuAction_Cancel:
+		{
+			if(IsClientInGame(client) && selection == MenuCancel_ExitBack)
+			{
+				CreateMainMenu(client).Display(client, MENU_TIME_FOREVER);
+			}
+		}
+		case MenuAction_End:
+		{
+			delete menu;
+		}
 	}
 }

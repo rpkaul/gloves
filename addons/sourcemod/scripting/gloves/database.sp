@@ -57,8 +57,9 @@ public void T_GetPlayerDataCallback(Database database, DBResultSet results, cons
 					g_iGroup[client][j] = results.FetchInt(i);
 					g_iGloves[client][j] = results.FetchInt(i + 1);
 					g_fFloatValue[client][j] = results.FetchFloat(i + 2);
-					g_iSeed[client][j] = results.FetchInt(i + 6);
 				}
+				g_iSeed[client][2] = results.FetchInt(7);
+				g_iSeed[client][3] = results.FetchInt(8);
 			}
 		}
 	}

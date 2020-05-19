@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see http://www.gnu.org/licenses/.
  */
+const int MAX_LANG = 40;
+
 Database db = null;
 
 char configPath[PLATFORM_MAX_PATH];
@@ -49,6 +51,13 @@ int g_iSteam32[MAXPLAYERS+1] = { 0, ... };
 
 bool g_bWaitingForSeed[MAXPLAYERS+1] = { false, ... };
 
-Menu menuGlovesGroup;
-Menu menuGloves[8];
+char g_Language[MAX_LANG][32];
+int g_iClientLanguage[MAXPLAYERS+1];
+
+Menu menuGlovesGroup[MAX_LANG];
+Menu menuGloves[MAX_LANG][8];
+int g_iLastGlovesGroupPosition[MAXPLAYERS+1];
 StringMap g_smGlovesGroupIndex;
+StringMap g_smLanguageIndex;
+
+

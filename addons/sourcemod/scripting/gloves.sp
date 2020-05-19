@@ -137,16 +137,8 @@ public void GivePlayerGloves(int client)
 				char buffers[2][10];
 				GetRandomSkin(client, buffer, sizeof(buffer), g_iGroup[client][playerTeam]);
 				ExplodeString(buffer, ";", buffers, 2, 10);
-				if (g_iGroup[client][playerTeam] == -1)
-				{
-					SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", StringToInt(buffers[0]));
-				}
-				else
-				{
-					SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", g_iGroup[client][playerTeam]);
-				}
+				SetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex", StringToInt(buffers[0]));
 				SetEntProp(ent, Prop_Send,  "m_nFallbackPaintKit", StringToInt(buffers[1]));
-				
 			}
 			else
 			{

@@ -15,33 +15,25 @@
  * this program. If not, see http://www.gnu.org/licenses/.
  */
 
-stock void GetRandomSkin(int client, char[] output, int outputSize, int groupId = -1)
+stock void GetRandomSkin(int client, char[] output, int outputSize, int group = -1)
 {
 	int max;
-	int groupIndex;
-	char buffer[20];
-
-	if(groupId != -1)
+	int random;
+	if(group != -1)
 	{
-		// only skin random
 		char groupStr[10];
-		IntToString(groupId, groupStr, sizeof(groupStr));
-		g_smGlovesGroupIndex.GetValue(groupStr, groupIndex);
-		max = menuGloves[groupIndex].ItemCount - 1;
-		int random = GetRandomInt(1, max);
-		menuGloves[groupIndex].GetItem(random, buffer, sizeof(buffer));
-		Format(output, outputSize, "%s", buffer);
+		IntToString(group, groupStr, sizeof(groupStr));
+		g_smGlovesGroupIndex.GetValue(groupStr, random);
 	}
 	else
 	{
-		max = menuGlovesGroup.ItemCount - 1;
-		int randomGroupIndex = GetRandomInt(2, max) - 1;
-		
-		max = menuGloves[randomGroupIndex].ItemCount - 1;
-		int random = GetRandomInt(1, max);
-		menuGloves[random].GetItem(random, buffer, sizeof(buffer));
-		Format(output, outputSize, "%s", buffer);
+		max = menuGlovesGroup[g_iClientLanguage[client]].ItemCount - 1;
+		random = GetRandomInt(2, max) - 1;
 	}
+	
+	max = menuGloves[g_iClientLanguage[client]][random].ItemCount - 1;
+	int random2 = GetRandomInt(1, max);
+	menuGloves[g_iClientLanguage[client]][random].GetItem(random2, output, outputSize);
 	
 }
 

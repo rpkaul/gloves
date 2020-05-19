@@ -12,6 +12,14 @@
 	{
 		"chi"	"减少 %d%%"
 	}
+	"ChooseLanguage"
+	{
+		"chi"	"请选择皮肤名称显示语言："
+	}
+	"Language"
+	{
+		"chi"	"更改语言"
+	}
 	"DefaultGloves"
 	{
 		"chi"	"默认手套"
@@ -39,10 +47,6 @@
 	"RandomBoth"
 	{
 		"chi"	"随机: 手套和皮肤"
-	}
-	"ChooseSkin"
-	{
-		"chi"	"选择皮肤"
 	}
 	"ChooseGlove"
 	{

@@ -12,6 +12,14 @@
 	{
 		"en"	"Decrease by %d%%"
 	}
+	"ChooseLanguage"
+	{
+		"en"	"Select language for glove names:"
+	}
+	"Language"
+	{
+		"en"	"Change Language"
+	}
 	"DefaultGloves"
 	{
 		"en"	"Default"
@@ -39,10 +47,6 @@
 	"RandomBoth"
 	{
 		"en"	"Random: Skin & Glove"
-	}
-	"ChooseSkin"
-	{
-		"en"	"Choose Skin"
 	}
 	"ChooseGlove"
 	{
