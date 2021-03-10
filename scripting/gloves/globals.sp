@@ -1,3 +1,5 @@
+// clang-format off
+
 /*  CS:GO Gloves SourceMod Plugin
  *
  *  Copyright (C) 2017 Kağan 'kgns' Üstüngel
@@ -50,6 +52,7 @@ Handle g_FloatTimer[MAXPLAYERS+1] = { INVALID_HANDLE, ... };
 int g_iSteam32[MAXPLAYERS+1] = { 0, ... };
 
 bool g_bWaitingForSeed[MAXPLAYERS+1] = { false, ... };
+bool g_bWaitingForWear[MAXPLAYERS+1] = { false, ... };
 
 char g_Language[MAX_LANG][32];
 int g_iClientLanguage[MAXPLAYERS+1];
