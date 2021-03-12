@@ -58,7 +58,7 @@ char g_Language[MAX_LANG][32];
 int g_iClientLanguage[MAXPLAYERS+1];
 
 Menu menuGlovesGroup[MAX_LANG];
-Menu menuGloves[MAX_LANG][8];
+Menu menuGloves[MAX_LANG][9];
 int g_iLastGlovesGroupPosition[MAXPLAYERS+1];
 StringMap g_smGlovesGroupIndex;
 StringMap g_smLanguageIndex;
